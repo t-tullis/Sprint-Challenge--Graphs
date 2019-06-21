@@ -148,6 +148,7 @@ def traverse():
 
 traverse()
 # print(traversalPath)
+                
 
 
 # TRAVERSAL TEST
