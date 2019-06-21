@@ -25,12 +25,129 @@ player = Player("Name", world.startingRoom)
 traversalPath = []
 
 #dictionary of opposite directions to walk 
-opposite_directions = {
+opp_dir = {
     "n": "s",
     "e": "w",
     "s": "n",
     "w": "e"
 }
+
+def traverse():
+    global traversalPath
+    visited = {}
+    prev_room_id = None
+    prev_dir_traveled = None
+    while len(visited) < len(roomGraph):
+        if prev_room_id != None:
+            visited[prev_room_id][prev_dir_traveled] = player.currentRoom.id
+        if player.currentRoom.id not in visited:
+            exits = {}
+            directions = player.currentRoom.getExits()
+            for direction in directions:
+                exits[direction] = '?'
+            if prev_dir_traveled != None:
+                exits[opp_dir[prev_dir_traveled]] = prev_room_id
+            visited[player.currentRoom.id] = exits
+            valid_exits = []
+            for e in exits:
+                if exits[e] == '?':
+                    valid_exits.append(e)
+            if len(valid_exits) == 0:
+                bt_path = []
+                q = Queue()
+                been_to = set()
+                search = True
+                starting_dir = player.currentRoom.getExits()
+                q.enqueue([[player.currentRoom.id, starting_dir[0]]])
+                while search:
+                    if len(visited) >= len(roomGraph):
+                        break
+                    path = q.dequeue()
+                    # print(path)
+                    v = path[-1][0]
+                    # print(v)
+                    for direction in visited[v]:
+                        if visited[v][direction] == '?':
+                            search = False
+                            # print(path)
+                            bt_path = [instruction[1] for instruction in path]
+                            # print(bt_path)
+                            # bt_path = bt_path[1:]
+                            # print(bt_path)
+                            prev_room_id = None
+                            prev_dir_traveled = None
+                            # print(bt_path)
+                            break
+                        if v not in been_to:
+                            been_to.add(v)
+                            for direction in visited[v]:
+                                path_copy = path.copy()
+                                path_copy.append(
+                                    [visited[v][direction], direction])
+                                q.enqueue(path_copy)
+                for d in bt_path[1:]:
+                    player.travel(d)
+                traversalPath = traversalPath + bt_path[1:]
+            elif len(valid_exits) == 1:
+                prev_room_id = player.currentRoom.id
+                prev_dir_traveled = valid_exits[0]
+                traversalPath.append(valid_exits[0])
+                player.travel(valid_exits[0])
+            else:
+                chosen_dir = valid_exits[random.randint(0, len(valid_exits)-1)]
+                prev_room_id = player.currentRoom.id
+                prev_dir_traveled = chosen_dir
+                traversalPath.append(chosen_dir)
+                player.travel(chosen_dir)
+        else:
+            dirs = visited[player.currentRoom.id]
+            valid_dirs = []
+            for vdir in dirs:
+                # print(dirs[vdir])
+                if dirs[vdir] == '?':
+                    valid_dirs.append(vdir)
+            if len(valid_dirs) == 0:
+                bt_path = []
+                q = Queue()
+                been_to = set()
+                search = True
+                starting_dir = player.currentRoom.getExits()
+                q.enqueue([[player.currentRoom.id, starting_dir[0]]])
+                while search:
+                    if len(visited) >= len(roomGraph):
+                        break
+                    path = q.dequeue()
+                    # print(path)
+                    v = path[-1][0]
+                    # print(v)
+                    for direction in visited[v]:
+                        if visited[v][direction] == '?':
+                            search = False
+                            # print(path)
+                            bt_path = [instruction[1] for instruction in path]
+                            prev_room_id = None
+                            prev_dir_traveled = None
+                            # print(bt_path)
+                            break
+                        if v not in been_to:
+                            been_to.add(v)
+                            for direction in visited[v]:
+                                path_copy = path.copy()
+                                path_copy.append(
+                                    [visited[v][direction], direction])
+                                q.enqueue(path_copy)
+                for d in bt_path[1:]:
+                    player.travel(d)
+                traversalPath = traversalPath + bt_path[1:]
+            else:
+                chosen_dir = valid_dirs[random.randint(0, len(valid_dirs)-1)]
+                prev_room_id = player.currentRoom.id
+                prev_dir_traveled = chosen_dir
+                traversalPath.append(chosen_dir)
+                player.travel(chosen_dir)
+
+traverse()
+# print(traversalPath)
 
 
 # TRAVERSAL TEST
