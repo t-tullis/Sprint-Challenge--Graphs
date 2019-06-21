@@ -1,6 +1,7 @@
 from room import Room
 from player import Player
 from world import World
+from util import Stack, Queue
 
 import random
 
@@ -21,7 +22,15 @@ player = Player("Name", world.startingRoom)
 
 
 # FILL THIS IN
-traversalPath = ['n', 's']
+traversalPath = []
+
+#dictionary of opposite directions to walk 
+opposite_directions = {
+    "n": "s",
+    "e": "w",
+    "s": "n",
+    "w": "e"
+}
 
 
 # TRAVERSAL TEST
